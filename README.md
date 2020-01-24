@@ -1,2 +1,2 @@
 # tec-NN
-TEC-1 Neural NetworK
+TEC-1 Neural Network
