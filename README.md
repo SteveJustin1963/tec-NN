@@ -14,7 +14,7 @@ TEC-1 Neural Network
 5. Gated recurrent unit, "are a gating mechanism in recurrent neural networks, use connections through a sequence of nodes to perform machine learning tasks associated with memory and clustering, for instance, in speech recognition."
 6. Echo state network, "is a type of reservoir computer that uses a recurrent neural network with a sparsely connected hidden layer (with typically 1% connectivity). The connectivity and weights of hidden neurons are fixed and randomly assigned. The weights of output neurons can be learned so that the network can produce or reproduce specific temporal patterns." see https://github.com/SteveJustin1963/tec-BRAIN
 7. Self-organizing map, "is an unsupervised machine learning technique used to produce a low-dimensional representation of a higher dimensional data set while preserving the topological structure of the data."
-8. Neural Turing machine
+8. Neural Turing machine, is a recurrent neural network model of a Turing machine, its a neural network that can learn to read and write from an external memory, just like a Turing machine. This makes it much more powerful than a traditional neural network, which can only learn to recognize patterns that are present in its training data.
 9. Deep belief network
 10. Stacked autoencoder
 11. Generative adversarial network
