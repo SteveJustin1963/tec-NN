@@ -10,7 +10,7 @@ Explore a range of code written in MINT to perform any of the NN operations for 
 
 ### 20 neural network types, and there are many more
 
-1. Feedforward neural network, uses perceptron algorithm 
+1. Feedforward neural network (FFN), uses perceptron algorithm 
 2. Convolutional neural network, uses deep learning algorithm
 3. Recurrent neural network, "are the state of the art algorithm for sequential data and are used by Apple's Siri and and Google's voice search. It is the first algorithm that remembers its input, due to an internal memory, which makes it perfectly suited for machine learning problems that involve sequential data."
 4. Long short-term memory, "are a type of recurrent neural network capable of learning order dependence in sequence prediction problems. This is a behavior required in complex problem domains like machine translation, speech recognition, and more. LSTMs are a complex area of deep learning."
