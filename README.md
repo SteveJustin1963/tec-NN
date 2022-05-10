@@ -7,12 +7,12 @@ TEC-1 Neural Network
 
 ### 20 neural network types
 
-1. Feedforward neural network
-2. Convolutional neural network
-3. Recurrent neural network
-4. Long short-term memory
-5. Gated recurrent unit
-6. Echo state network
+1. Feedforward neural network, uses perceptron algorithm 
+2. Convolutional neural network, uses deep learning algorithm
+3. Recurrent neural network, "are the state of the art algorithm for sequential data and are used by Apple's Siri and and Google's voice search. It is the first algorithm that remembers its input, due to an internal memory, which makes it perfectly suited for machine learning problems that involve sequential data."
+4. Long short-term memory, "are a type of recurrent neural network capable of learning order dependence in sequence prediction problems. This is a behavior required in complex problem domains like machine translation, speech recognition, and more. LSTMs are a complex area of deep learning."
+5. Gated recurrent unit, "are a gating mechanism in recurrent neural networks, use connections through a sequence of nodes to perform machine learning tasks associated with memory and clustering, for instance, in speech recognition."
+6. Echo state network, "is a type of reservoir computer that uses a recurrent neural network with a sparsely connected hidden layer (with typically 1% connectivity). The connectivity and weights of hidden neurons are fixed and randomly assigned. The weights of output neurons can be learned so that the network can produce or reproduce specific temporal patterns." see tec-BRAIN 
 7. Self-organizing map
 8. Neural Turing machine
 9. Deep belief network
