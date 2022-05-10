@@ -5,6 +5,30 @@ TEC-1 Neural Network
 "In the case of recognizing handwriting or facial recognition, the brain very quickly makes some decisions."
 "There are several kinds of artificial neural networks. These types of networks are implemented based on the mathematical operations and a set of parameters required to determine the output."
 
+### 20 neural network types
+
+1. Feedforward neural network
+2. Convolutional neural network
+3. Recurrent neural network
+4. Long short-term memory
+5. Gated recurrent unit
+6. Echo state network
+7. Self-organizing map
+8. Neural Turing machine
+9. Deep belief network
+10. Stacked autoencoder
+11. Generative adversarial network
+12. Siamese network
+13. Highway network
+14. Dropout
+15. Perceptron
+16. Multilayer perceptron
+17. Radial basis function network
+18. Support vector machine
+19. Max-pooling
+20. Average-pooling
+
+
 ### iterate
 - https://github.com/SteveJustin1963/tec-AI
 - https://github.com/SteveJustin1963/tec-memR
