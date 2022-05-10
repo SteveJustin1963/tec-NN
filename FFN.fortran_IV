@@ -4,6 +4,10 @@
   b) Adjust the weights and biases according to the perceptron learning rule.
 3) Repeat step 2 until the error rate is low.
 
+
+ 
+ 
+
 program neural_network
 
 implicit none
@@ -53,5 +57,6 @@ do i = 1, n_inputs
 end do
 
 end program neural_network
+
 
 
