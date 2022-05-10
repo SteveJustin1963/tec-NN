@@ -1,5 +1,6 @@
  ! fortran 95
-
+! still has bugs
+! https://www.onlinegdb.com/online_fortran_compiler
  
 
 program neural_network
