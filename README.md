@@ -50,4 +50,5 @@ Multilayer perceptron (MLP) is a supervised learning algorithm that learns a fun
 - https://www.ibm.com/cloud/learn/neural-networks
 - https://analyticsindiamag.com/6-types-of-artificial-neural-networks-currently-being-used-in-todays-technology/
 - https://machinelearningmastery.com/pooling-layers-for-convolutional-neural-networks/#:~:text=Average%20pooling%20involves%20calculating%20the,6%C3%976%20feature%20map.
+- https://dzone.com/articles/the-very-basic-introduction-to-feed-forward-neural
 - 
