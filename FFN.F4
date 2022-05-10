@@ -1,11 +1,11 @@
-1) Initialize the weights and biases to random values.
-2) For each training example:
-  a) Calculate the output of the network.
-  b) Adjust the weights and biases according to the perceptron learning rule.
-3) Repeat step 2 until the error rate is low.
+! 1) Initialize the weights and biases to random values.
+!2) For each training example:
+!  a) Calculate the output of the network.
+!  b) Adjust the weights and biases according to the perceptron learning rule.
+!3) Repeat step 2 until the error rate is low.
 
 
- 
+! Fortran IV
  
 
 program neural_network
