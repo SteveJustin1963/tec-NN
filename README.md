@@ -1,7 +1,7 @@
 # tec-NN
 TEC-1 Neural Network
 
-Explore a range of code written in MINT to perform any of the NN operations for experimentation. I like point 6 and 20.
+
 
 ### def
 "neural networks, are computing systems inspired by the biological neural networks that constitute animal brains. An ANN is based on a collection of connected units or nodes called artificial neurons, which loosely model the neurons in a biological brain."
@@ -31,6 +31,10 @@ Multilayer perceptron (MLP) is a supervised learning algorithm that learns a fun
 18. Support vector machine, is a supervised machine learning algorithm that can be used for both classification and regression tasks. The algorithm is a discriminative classifier that attempts to draw a line between two clusters of data. In linear SVM classification, the line is drawn so that it maximally separates the two groups of data. In SVM regression, the line is drawn so as to minimize the error between the predicted values and the actual values.
 19. Max-pooling, Max pooling is a type of pooling layer used in convolutional neural networks. A pooling layer performs a down-sampling operation on the input, reducing its size and dimensionality. The max pooling layer operates on a window of n x n pixels, and a stride of s. It outputs the maximum value of the n x n window for each s pixels. For example, if the input is an image with dimensions 4 x 4, and the max pooling layer has a window of size 2 x 2 and a stride of 2, the output will be an image with dimensions 2 x 2.
 20. Average-pooling, The average pooling operation is a way of downsampling the feature map. This is done by taking the average value for each patch of the feature map. This means that each NxN square of the feature map is down sampled to the average value in that NxN square. This can be seen as a reduction in the dimensionality of the feature map.
+
+### code and interfacing
+Explore a range of code written in MINT to perform any of the NN operations for experimentation. I will work on 1, 6 and 20.
+
 
 
 ### iterate
