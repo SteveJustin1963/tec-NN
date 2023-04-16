@@ -17,6 +17,7 @@ The use of parallel processing techniques such as OpenMP can significantly speed
 and make it feasible to train neural networks on large datasets. 
 This code provides a practical implementation of parallel neural network training with OpenMP 
 that can be used as a basis for building more advanced neural network models for real-world applications.
+sj
 ***********************************/
 
 #include <stdio.h>
