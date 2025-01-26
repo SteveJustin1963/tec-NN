@@ -155,8 +155,7 @@ This pseudo-code assumes that the derivative of the activation function is known
 
 
 # Hopfield Network simulation and visualization 
-in MINT, we can break it into steps that align with MINT's minimalistic, stack-based structure. Here's a basic outline:
-Steps:
+using MINT:
 1. Define Variables: Use single-letter variables to represent neurons, weights, activations, and energy.
 2. Initialize Weights: Use an array to store the weights for the connections between neurons. The Hebbian rule can be applied here.
 3. Neuron Update Rule: Create a function to update the state of each neuron based on the weighted sum of inputs.
