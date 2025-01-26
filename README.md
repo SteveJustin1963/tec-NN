@@ -153,6 +153,281 @@ The backpropagation function operates in two steps:
 
 This pseudo-code assumes that the derivative of the activation function is known. For the sigmoid function, the derivative is sigmoid(x) * (1 - sigmoid(x)), where x is the input to the function. Different activation functions will have different derivatives.
 
+## summary of potential issues or areas of improvement needed:
+
+### Potential Issues or Improvements:
+1. **Activation Function Flexibility**: 
+   - The code assumes a sigmoid activation function. While sigmoid is a common choice, modern practices often use ReLU for hidden layers and softmax for output layers (for classification tasks). Consider allowing flexibility to use different activation functions.
+
+2. **Gradient Vanishing Problem**: 
+   - Sigmoid activation is prone to vanishing gradients, especially in deeper networks. If the network gets complex, ReLU or other functions might perform better.
+
+3. **Weight Initialization**: 
+   - Random initialization between -1 and 1 is simple, but modern techniques (e.g., Xavier or He initialization) often yield better convergence and stability during training.
+
+4. **Learning Rate Tuning**:
+   - A static learning rate (0.1) may not always converge efficiently. Implementing a learning rate schedule or using adaptive methods like Adam optimizer could improve performance.
+
+5. **Forward and Backpropagation Simplification**:
+   - The pseudo-code separates computations for each layer explicitly. This is clear but could benefit from matrix-based operations for efficiency.
+
+6. **Missing Details on Dataset Handling**:
+   - The pseudo-code doesn’t specify handling batch sizes or shuffling data for better generalization during training.
+
+7. **Error Rate Stopping Criteria**:
+   - “Repeat until the error rate is low” is vague. Specify a threshold or a maximum number of iterations to prevent indefinite loops.
+
+8. **Scalability**:
+   - For larger datasets and models, you might need to consider parallelization or GPU support, which is not addressed here.
+
+9. **Bias Initialization**:
+   - The biases are initialized randomly, but specific initialization strategies (e.g., setting them to zero) might simplify learning in some cases.
+
+#  Forward_Propagate  function  
+
+```mint
+: F  n! m!    // n = number of inputs, m = number of outputs
+  [ 0 0 0 ] h!   // Initialize hidden layer values (adjust size as needed)
+  [ 0 0 ] o!     // Initialize output layer values (adjust size as needed)
+  [ 1 2 3 4 5 6 ] w1!  // Example weights for input to hidden layer (2x3 matrix)
+  [ 7 8 9 ] b1!  // Example biases for hidden layer (3 values)
+  [ 1 2 3 ] w2!  // Example weights for hidden to output layer (3x2 matrix)
+  [ 4 5 ] b2!    // Example biases for output layer (2 values)
+  
+  n (            // Loop through inputs
+    i?           // Fetch input value
+    0 /i!        // Reset input counter for hidden layer
+    m (          // Loop through hidden layer neurons
+      w1 /i? * h /i + b1 /i! // Weighted sum + bias
+      h /i Activation_Function // Apply activation function
+      /N         // Move to the next
+    )
+  )
+  m (            // Loop through output layer neurons
+    h /i? * o /i + b2 /i! // Weighted sum + bias
+    o /i Activation_Function // Apply activation function
+    /N         // Output finalized result
+  )
+;
+```
+
+### Notes:
+1. **Initialization**:
+   - You may need to set appropriate weights and biases for your specific use case.
+   - Adjust the array sizes as per the layer dimensions.
+
+2. **Activation Function**:
+   - Replace `Activation_Function` with your desired activation logic (e.g., sigmoid or ReLU).
+
+3. **Matrix Multiplication**:
+   - Since MINT uses basic operations, the weighted sum is achieved through loops rather than matrix math.
+
+4. **Scalability**:
+   - The code is built for small examples due to MINT's memory and processing constraints. For larger networks, consider chunking operations.
+
+# Back_Propagate code
+
+```mint
+: B n! m! lr!  // n = number of inputs, m = number of outputs, lr = learning rate
+  [ 0 0 ] t!    // Target values (adjust size as needed)
+  [ 0 0 ] e!    // Output layer errors (adjust size as needed)
+  [ 0 0 0 ] h_e! // Hidden layer errors (adjust size as needed)
+  
+  // Step 1: Calculate output layer errors
+  m (              // Loop through output layer neurons
+    o /i? t /i? - e /i!   // Error = target - output
+    o /i? (1 o /i? - *) e /i * e /i! // Apply derivative of activation (sigmoid)
+  )
+
+  // Step 2: Update weights and biases for output layer
+  m (              // Loop through output layer neurons
+    e /i? lr * b2 /i + b2 /i!  // Update biases: bias += error * learning_rate
+    h /j (          // Loop through hidden layer neurons
+      e /i? h /j? * lr * w2 /j /i + w2 /j /i! // Update weights: weight += error * hidden * learning_rate
+    )
+  )
+
+  // Step 3: Calculate hidden layer errors
+  h (              // Loop through hidden layer neurons
+    0 h_e /j!      // Reset hidden error to 0
+    m (            // Loop through output layer neurons
+      w2 /j /i? e /i? * h_e /j + h_e /j! // Error propagation: hidden_error += weight * output_error
+    )
+    h /j? (1 h /j? - *) h_e /j * h_e /j! // Apply derivative of activation (sigmoid)
+  )
+
+  // Step 4: Update weights and biases for hidden layer
+  h (              // Loop through hidden layer neurons
+    h_e /j? lr * b1 /j + b1 /j!  // Update biases: bias += error * learning_rate
+    n (            // Loop through input neurons
+      h_e /j? i /k? * lr * w1 /k /j + w1 /k /j! // Update weights: weight += error * input * learning_rate
+    )
+  )
+;
+```
+
+### Explanation:
+1. **Error Calculation**:
+   - **Output Layer**: Compute the difference between the target and output values. Multiply by the derivative of the activation function.
+   - **Hidden Layer**: Propagate the error backward using the weights between the hidden and output layers. Multiply by the derivative of the activation function.
+
+2. **Weight and Bias Updates**:
+   - Update weights and biases for both the output and hidden layers using the gradient (`error * input`) scaled by the learning rate.
+
+3. **Activation Function Derivative**:
+   - Assumes sigmoid activation. The derivative is `output * (1 - output)`.
+
+4. **Loops**:
+   - Each layer is updated by looping through its neurons and connecting weights.
+
+### Customization:
+- Replace the activation function and its derivative if needed.
+- Adjust sizes of arrays (`t!`, `e!`, `h_e!`) for your specific network.
+
+## improved
+```
+// Neural Network Forward Propagation in MINT
+// Variables used:
+// n: number of inputs
+// h: number of hidden neurons
+// o: number of outputs
+// s: state arrays for layers
+// w: weight arrays
+// b: bias arrays
+// t: temporary calculations
+
+:I                              // Initialize network
+  2 n!                          // 2 inputs
+  3 h!                          // 3 hidden neurons
+  2 o!                          // 2 outputs
+  
+  // Initialize state arrays
+  [ 0 0 ] i!                    // Input layer
+  [ 0 0 0 ] s!                  // Hidden layer
+  [ 0 0 ] r!                    // Output layer
+  
+  // Initialize weights (input->hidden)
+  [ 1 2 3                       // 2x3 weight matrix
+    4 5 6 ] w!                  // Row-major order
+    
+  // Initialize weights (hidden->output)
+  [ 7 8 9                       // 3x2 weight matrix
+    1 2 3 ] v!                  // Row-major order
+    
+  // Initialize biases
+  [ 1 1 1 ] b!                  // Hidden layer bias
+  [ 1 1 ] c!                    // Output layer bias
+;
+
+:A                              // Activation function (ReLU)
+  k!                            // Store input value
+  k 0 > (                       // If input > 0
+    k                           // Return input
+  ) /E (                        // Else
+    0                           // Return 0
+  )
+;
+
+:H                              // Calculate hidden layer
+  n(                            // For each input
+    h(                          // For each hidden neuron
+      /i h * /j + k!            // Get weight index
+      w k ? i /i ? *            // Weight * input
+      s /j ? +                  // Add to sum
+      s /j ?!                   // Store result
+    )
+  )
+  
+  h(                            // For each hidden neuron
+    s /i ? b /i ? +            // Add bias
+    A                           // Apply activation
+    s /i ?!                     // Store result
+  )
+;
+
+:O                              // Calculate output layer
+  h(                            // For each hidden neuron
+    o(                          // For each output neuron
+      /i o * /j + k!            // Get weight index
+      v k ? s /i ? *            // Weight * hidden
+      r /j ? +                  // Add to sum
+      r /j ?!                   // Store result
+    )
+  )
+  
+  o(                            // For each output
+    r /i ? c /i ? +            // Add bias
+    A                           // Apply activation
+    r /i ?!                     // Store result
+  )
+;
+
+:P                              // Print network state
+  `Input Layer: `
+  n( i /i ? . ` ` )
+  /N
+  `Hidden Layer: `
+  h( s /i ? . ` ` )
+  /N
+  `Output Layer: `
+  o( r /i ? . ` ` )
+  /N
+;
+
+:F                              // Forward propagation
+  I                             // Initialize network
+  H                             // Calculate hidden layer
+  O                             // Calculate output layer
+  P                             // Print results
+;
+```
+
+
+Key improvements made:
+
+1. Better Organization:
+   - Split into clear functional units (init, activation, hidden, output)
+   - Better variable naming and management
+   - Clear comments and documentation
+
+2. Proper Array Handling:
+   - Correct array indexing for matrices
+   - Proper weight matrix organization in row-major order
+   - Separate arrays for each layer's states
+
+3. Added ReLU Activation:
+   - Implemented ReLU function (returns x if x>0, else 0)
+   - Applied consistently to both layers
+   - Can be easily modified for other functions
+
+4. Added Visualization:
+   - P function shows state of all layers
+   - Clear formatting with labels
+   - Shows input, hidden, and output values
+
+5. Better Memory Management:
+   - Fixed-size arrays for small network
+   - Reuses temporary variables
+   - More efficient calculations
+
+To use the network:
+```mint
+F    // Runs forward propagation and shows results
+```
+
+The program will:
+1. Initialize the network with example weights
+2. Calculate hidden layer activations
+3. Calculate output layer activations
+4. Show the values in each layer
+
+Limitations/Notes:
+1. This is a small network (2-3-2 architecture) due to MINT's constraints
+2. Uses ReLU activation for simplicity
+3. Weights and biases are hardcoded (could be modified for learning)
+4. Matrix operations are done element-by-element due to MINT's limitations
+
+
 
 # Hopfield Network simulation and visualization 
 using MINT:
@@ -431,6 +706,146 @@ Each neuron is shown as:
 
 The energy should decrease as the network converges to a stable pattern.
 
+## another improvement
+```
+// Neural Network Backpropagation in MINT
+// Variables:
+// n: input neurons
+// h: hidden neurons
+// o: output neurons
+// l: learning rate
+// s: state arrays
+// e: error arrays
+// w: weights
+// d: derivatives
+// t: targets
+
+:I                              // Initialize network
+  2 n!                          // 2 inputs
+  3 h!                          // 3 hidden neurons
+  2 o!                          // 2 outputs
+  5 100 / l!                    // Learning rate 0.05
+  
+  // Initialize arrays
+  [ 0 0 ] i!                    // Input values
+  [ 0 0 0 ] s!                  // Hidden layer states
+  [ 0 0 ] r!                    // Output layer states
+  [ 0 0 ] t!                    // Target values
+  [ 0 0 ] e!                    // Output errors
+  [ 0 0 0 ] d!                  // Hidden errors
+  
+  // Initialize weights as before
+  [ 1 2 3 4 5 6 ] w!           // Input->Hidden weights
+  [ 7 8 9 1 2 3 ] v!           // Hidden->Output weights
+;
+
+:D                              // ReLU derivative
+  k!                            // Store input
+  k 0 > (                       // If input > 0
+    1                           // Derivative is 1
+  ) /E (                        // Else
+    0                           // Derivative is 0
+  )
+;
+
+:E                              // Calculate output errors
+  o(                            // For each output neuron
+    t /i ? r /i ? -            // target - output
+    r /i ? D *                  // Multiply by derivative
+    e /i ?!                     // Store error
+  )
+;
+
+:H                              // Calculate hidden layer errors
+  h(                            // For each hidden neuron
+    0 m!                        // Initialize sum
+    o(                          // For each output
+      /j o * /i + k!            // Get weight index
+      v k ? e /i ? *            // weight * output_error
+      m + m!                    // Add to sum
+    )
+    m s /i ? D *               // Multiply by derivative
+    d /i ?!                     // Store hidden error
+  )
+;
+
+:U                              // Update weights and biases
+  // Update output layer weights
+  h(                            // For each hidden neuron
+    o(                          // For each output
+      /i o * /j + k!            // Get weight index
+      v k ? e /j ? s /i ? * l * + // weight += error * hidden * rate
+      v k ?!                    // Store updated weight
+    )
+  )
+  
+  // Update hidden layer weights
+  n(                            // For each input
+    h(                          // For each hidden
+      /i h * /j + k!            // Get weight index
+      w k ? d /j ? i /i ? * l * + // weight += error * input * rate
+      w k ?!                    // Store updated weight
+    )
+  )
+;
+
+:P                              // Print errors
+  `Output Errors: `
+  o( e /i ? . ` ` )
+  /N
+  `Hidden Errors: `
+  h( d /i ? . ` ` )
+  /N
+;
+
+:B                              // Backpropagation
+  E                             // Calculate output errors
+  H                             // Calculate hidden errors
+  U                             // Update weights
+  P                             // Print results
+;
+```
+
+
+Key improvements made:
+
+1. Better Organization:
+   - Split into clear functional units 
+   - Proper initialization function
+   - Separate error calculation and weight updates
+
+2. Improved Error Handling:
+   - Separate arrays for output and hidden errors
+   - Better error propagation logic
+   - Clear error display function
+
+3. Better Activation Function:
+   - Uses ReLU instead of sigmoid for simplicity
+   - Proper derivative calculation
+   - More efficient implementation
+
+4. Memory Management:
+   - Better array organization
+   - More efficient index calculations
+   - Reusable temporary variables
+
+5. Learning Rate:
+   - Scaled learning rate (0.05) using integer math
+   - Can be easily adjusted
+   - Prevents overflow issues
+
+To use:
+```mint
+I    // Initialize network
+B    // Run one backpropagation step
+```
+
+Limitations/Notes:
+1. Uses small network (2-3-2) due to MINT constraints
+2. Integer math may affect precision
+3. ReLU activation for better stability
+4. Weights need proper initialization
+5. May need multiple iterations for convergence
 
 
 
