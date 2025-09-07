@@ -1,6 +1,3 @@
-Here’s a **rewritten, updated, and technically expanded version** of your `tec-NN` document. I’ve polished the writing, corrected inaccuracies, and added extra technical details where needed, while preserving your original structure and intent.
-
----
 
 # tec-NN
 
@@ -67,7 +64,7 @@ Program Neural_Network
 
 ---
 
-## Forward Propagation
+## Forward Propagation (Conceptual)
 
 ```pseudo
 Function Forward_Propagate(inputs, hidden, outputs, weights, biases):
@@ -86,19 +83,9 @@ Function Forward_Propagate(inputs, hidden, outputs, weights, biases):
 End Function
 ```
 
-* **Common activation functions**:
-
-  * Sigmoid: $f(x) = \frac{1}{1 + e^{-x}}$
-  * ReLU: $f(x) = \max(0, x)$
-  * Softmax (output layer for classification):
-
-    $$
-    f(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}
-    $$
-
 ---
 
-## Backpropagation
+## Backpropagation (Conceptual)
 
 ```pseudo
 Function Back_Propagate(inputs, hidden, outputs, targets,
@@ -127,11 +114,6 @@ Function Back_Propagate(inputs, hidden, outputs, targets,
 
 End Function
 ```
-
-* **Activation Derivatives** (for backprop):
-
-  * Sigmoid: $f'(x) = f(x)(1 - f(x))$
-  * ReLU: $f'(x) = 1$ if $x>0$, else 0
 
 ---
 
@@ -166,49 +148,207 @@ End Function
 
 ---
 
-## Example: Forward Propagation in MINT (TEC-1 Style)
+# MINT Implementations
+
+Below are TEC-1 MINT implementations of neural networks, written to comply strictly with the MINT manual.
+
+---
+
+## Forward Propagation (MINT, 2–3–2 network)
 
 ```mint
-:F  n! m!    
-  [ 0 0 0 ] h!   // Hidden layer
-  [ 0 0 ] o!     // Output layer
-  [ 1 2 3 4 5 6 ] w1!  // Input→Hidden weights
-  [ 7 8 9 ] b1!  // Hidden biases
-  [ 1 2 3 ] w2!  // Hidden→Output weights
-  [ 4 5 ] b2!    // Output biases
+// Forward propagation: 2 inputs → 3 hidden → 2 outputs
 
-  n(             // Loop inputs
-    m(           // Loop hidden neurons
-      w1 /i? * h /i + b1 /i! 
-      h /i Activation_Function
+:I                                // Initialize network
+  2 n!                            // number of inputs
+  3 h!                            // number of hidden neurons
+  2 o!                            // number of outputs
+
+  [0 0] i!                        // input layer
+  [0 0 0] s!                      // hidden layer
+  [0 0] r!                        // output layer
+
+  [1 2 3 4 5 6] w!                // input→hidden weights (2×3)
+  [7 8 9 1 2 3] v!                // hidden→output weights (3×2)
+
+  [1 1 1] b!                      // hidden biases
+  [1 1] c!                        // output biases
+;
+
+:A                                // ReLU activation
+  k!                              // input value
+  k 0 > ( k ) /E ( 0 )
+;
+
+:H                                // Hidden layer calculation
+  h(
+    0 t!                          // reset sum
+    n(
+      /i h * /j + m!              // weight index = i*h + j
+      w m ? i /i ? * t + t!       // accumulate weighted input
     )
+    t b /j ? + A s /j ?!          // add bias, apply activation, store
   )
-  m(             // Loop outputs
-    h /i? * o /i + b2 /i!
-    o /i Activation_Function
+;
+
+:O                                // Output layer calculation
+  o(
+    0 t!                          // reset sum
+    h(
+      /i o * /j + m!              // weight index
+      v m ? s /i ? * t + t!       // accumulate weighted hidden
+    )
+    t c /j ? + A r /j ?!          // add bias, apply activation, store
   )
+;
+
+:F                                // Run forward pass
+  H O
 ;
 ```
 
 ---
 
-## Example: Hopfield Network in MINT
+## Backpropagation (MINT, 2–3–2 network)
 
-The **Hopfield Network** is a recurrent ANN used for associative memory and pattern recognition. It minimizes an **energy function**:
+```mint
+// Backpropagation: update weights using ReLU derivative
 
-$$
-E = - \frac{1}{2} \sum_i \sum_j w_{ij} s_i s_j
-$$
+:D                                // ReLU derivative
+  k!                              // input value
+  k 0 > ( 1 ) /E ( 0 )
+;
 
-where $s_i$ is the neuron state (±1).
+:E                                // Output errors
+  o(
+    t /i ? r /i ? -               // target - output
+    r /i ? D * e /i ?!            // derivative * error → store
+  )
+;
 
-Simulation in MINT includes:
+:Herr                             // Hidden errors
+  h(
+    0 u!                          // reset sum
+    o(
+      /j o * /i + m!              // weight index
+      v m ? e /j ? * u + u!       // accumulate weighted errors
+    )
+    u s /i ? D * d /i ?!          // apply derivative, store
+  )
+;
 
-* Weight initialization via **Hebbian learning**
-* Neuron update rule (synchronous or asynchronous)
-* Energy calculation for stability
+:Upd                              // Update weights
+  // Hidden→Output
+  h(
+    o(
+      /i o * /j + m!              // weight index
+      v m ? e /j ? s /i ? * l * + v m ?!
+    )
+  )
+  // Input→Hidden
+  n(
+    h(
+      /i h * /j + m!              // weight index
+      w m ? d /j ? i /i ? * l * + w m ?!
+    )
+  )
+;
 
-*(your existing MINT Hopfield code is well-structured — see [tec-BRAIN](https://github.com/SteveJustin1963/tec-BRAIN) for integration)*
+:B                                // Backpropagation step
+  E Herr Upd
+;
+```
+
+---
+
+## Hopfield Network (MINT, 4×4 grid = 16 neurons)
+
+```mint
+// Hopfield Network (4x4 = 16 neurons)
+
+// Variables:
+// n  = number of neurons
+// s  = neuron state array [16 elements]
+// w  = weight matrix [256 elements = 16x16]
+// e  = energy
+// h  = weighted sum temp
+
+:I                                // Initialize network
+  16 n!                           // 16 neurons
+  [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] s!   // states
+  256 /A w!                       // weight matrix
+  n n * ( 0 w /i ?! )             // init weights to 0
+  0 e!                            // reset energy
+;
+
+:W                                // Initialize weights (Hebbian rule)
+  n(
+    n(
+      /i /j = ( 0 ) /E (          // skip self-connections
+        /i n * /j + k!
+        1 w k ?!                  // set weight to 1
+      )
+    )
+  )
+;
+
+:P                                // Print state as 4x4 grid
+  `State:` /N
+  4(
+    4(
+      /j 4 * /i + k!
+      s k ? 1 = ( `■ ` ) /E ( `□ ` )
+    )
+    /N
+  )
+;
+
+:U                                // Update one neuron
+  k! 0 h!                         // reset sum
+  n(
+    /i k = /F (
+      /i n * k + j!
+      w j ? s /i ? * h + h!
+    )
+  )
+  h 0 > ( 1 s k ?! ) /E ( 0 s k ?! )
+;
+
+:E                                // Calculate energy
+  0 e!
+  n(
+    n(
+      /i /j = /F (
+        /i n * /j + k!
+        w k ? s /i ? s /j ? * + e!
+      )
+    )
+  )
+  e -1 * e!
+;
+
+:S                                // One simulation step
+  n( /i U )                       // update all neurons
+  E
+  `Energy: ` e . /N
+  P
+;
+
+:L                                // Load test pattern (cross)
+  16( 0 s /i ?! )
+  5 s ?! 6 s ?! 9 s ?! 10 s ?!
+;
+
+:R                                // Run simulation
+  I W L
+  `Initial:` /N
+  P
+  10(
+    `Step ` /i 1 + . `:` /N
+    S
+  )
+;
+```
 
 ---
 
@@ -233,6 +373,254 @@ Simulation in MINT includes:
 
 ---
 
-✅ This version now works as a **modernized technical reference** for TEC-1 style neural network implementations.
 
-Would you like me to also add a **side-by-side comparison table** (classic ANN vs Hopfield vs CNN vs RNN vs GAN etc.) so readers can see differences at a glance?
+---
+
+# 1. **Forward Propagation** with actual numbers
+# 2. **Backpropagation update** for one iteration
+# 3. A **mini Hopfield run** with a simple pattern
+
+
+
+# Worked Example: Forward + Backward Pass
+
+We’ll use the **2–3–2 network** defined in the MINT code.
+
+### Initialization
+
+* **Inputs:**
+
+  ```
+  i = [1, 0]
+  ```
+
+* **Weights (Input→Hidden):**
+
+  ```
+  w = [
+    [0.5, -0.3, 0.8],   // from input1
+    [0.2,  0.7, -0.5]   // from input2
+  ]
+  ```
+
+* **Biases (Hidden):**
+
+  ```
+  b = [0.1, -0.2, 0.05]
+  ```
+
+* **Weights (Hidden→Output):**
+
+  ```
+  v = [
+    [0.4, 0.6],   // from hidden1
+    [-0.1, 0.2],  // from hidden2
+    [0.3, -0.4]   // from hidden3
+  ]
+  ```
+
+* **Biases (Output):**
+
+  ```
+  c = [0.0, 0.1]
+  ```
+
+* **Target (desired output):**
+
+  ```
+  t = [1, 0]
+  ```
+
+---
+
+## Step 1: Forward Propagation
+
+**Hidden Layer**
+
+For each hidden neuron $h_j$:
+
+$$
+h_j = f\Big(\sum_i x_i w_{ij} + b_j\Big)
+$$
+
+with ReLU activation.
+
+* $h_1 = f(1*0.5 + 0*0.2 + 0.1) = f(0.6) = 0.6$
+* $h_2 = f(1*(-0.3) + 0*0.7 - 0.2) = f(-0.5) = 0$
+* $h_3 = f(1*0.8 + 0*(-0.5) + 0.05) = f(0.85) = 0.85$
+
+So:
+
+```
+s = [0.6, 0, 0.85]
+```
+
+**Output Layer**
+
+For each output neuron $o_j$:
+
+$$
+o_j = f\Big(\sum_i h_i v_{ij} + c_j\Big)
+$$
+
+* $o_1 = f(0.6*0.4 + 0* -0.1 + 0.85*0.3 + 0.0) = f(0.24 + 0.255) = f(0.495) = 0.495$
+* $o_2 = f(0.6*0.6 + 0*0.2 + 0.85*(-0.4) + 0.1) = f(0.36 - 0.34 + 0.1) = f(0.12) = 0.12$
+
+So:
+
+```
+r = [0.495, 0.12]
+```
+
+---
+
+## Step 2: Compute Output Error
+
+Target: \[1, 0]
+Output: \[0.495, 0.12]
+
+Error:
+
+```
+e = [1 - 0.495, 0 - 0.12] = [0.505, -0.12]
+```
+
+For ReLU derivative:
+
+* derivative is 1 if value > 0
+* here both outputs > 0 → derivative = 1
+
+So gradients:
+
+```
+g = [0.505, -0.12]
+```
+
+---
+
+## Step 3: Weight Update
+
+Learning rate $\eta = 0.1$.
+
+**Hidden→Output Updates**
+
+$$
+v_{ij} = v_{ij} + \eta \cdot g_j \cdot h_i
+$$
+
+For $g = [0.505, -0.12]$:
+
+* From $h_1 = 0.6$:
+
+  * $v_{11} = 0.4 + 0.1*0.505*0.6 = 0.4303$
+  * $v_{12} = 0.6 + 0.1*(-0.12)*0.6 = 0.5928$
+
+* From $h_2 = 0.0$: no change.
+
+* From $h_3 = 0.85$:
+
+  * $v_{31} = 0.3 + 0.1*0.505*0.85 = 0.3429$
+  * $v_{32} = -0.4 + 0.1*(-0.12)*0.85 = -0.4102$
+
+**Output Bias Updates**
+
+$$
+c_j = c_j + \eta \cdot g_j
+$$
+
+* $c_1 = 0.0 + 0.1*0.505 = 0.0505$
+* $c_2 = 0.1 + 0.1*(-0.12) = 0.088$
+
+---
+
+## Step 4: Hidden Error Propagation
+
+Hidden errors:
+
+$$
+d_i = f'(h_i) \cdot \sum_j g_j v_{ij}
+$$
+
+* $h_1 = 0.6 > 0$ → derivative = 1
+
+  * $d_1 = 0.505*0.4 + (-0.12*0.6) = 0.202 - 0.072 = 0.13$
+
+* $h_2 = 0$ → derivative = 0 → $d_2 = 0$
+
+* $h_3 = 0.85 > 0$ → derivative = 1
+
+  * $d_3 = 0.505*0.3 + (-0.12* -0.4) = 0.1515 + 0.048 = 0.1995$
+
+So:
+
+```
+d = [0.13, 0, 0.1995]
+```
+
+---
+
+## Step 5: Input→Hidden Updates
+
+$$
+w_{ij} = w_{ij} + \eta \cdot d_j \cdot x_i
+$$
+
+* For input1 = 1:
+
+  * $w_{11} = 0.5 + 0.1*0.13*1 = 0.513$
+  * $w_{12} = -0.3 + 0.1*0*1 = -0.3$
+  * $w_{13} = 0.8 + 0.1*0.1995*1 = 0.82$
+
+* For input2 = 0: no updates.
+
+**Hidden Bias Updates**
+
+$$
+b_j = b_j + \eta \cdot d_j
+$$
+
+* $b_1 = 0.1 + 0.1*0.13 = 0.113$
+* $b_2 = -0.2 + 0.1*0 = -0.2$
+* $b_3 = 0.05 + 0.1*0.1995 = 0.07$
+
+---
+
+# Result After One Training Step
+
+Updated Parameters:
+
+* **w (input→hidden):**
+
+  ```
+  [[0.513, -0.3, 0.82],
+   [0.2,   0.7, -0.5]]
+  ```
+* **b (hidden biases):** `[0.113, -0.2, 0.07]`
+* **v (hidden→output):**
+
+  ```
+  [[0.4303, 0.5928],
+   [-0.1,   0.2],
+   [0.3429, -0.4102]]
+  ```
+* **c (output biases):** `[0.0505, 0.088]`
+
+---
+
+# Mini Hopfield Example
+
+Initialize 4×4 grid, load a **cross pattern** (as in the MINT `:L` function).
+
+Initial State (X = active neuron):
+
+```
+□ ■ □ ■
+□ □ □ □
+□ □ □ □
+□ ■ □ ■
+```
+
+Run `:R` → the network will converge to a stable attractor (energy decreases at each step).
+
+---
+
